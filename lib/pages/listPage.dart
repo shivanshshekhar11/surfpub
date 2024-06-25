@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:surfpub/flutterPackage.dart';
+import 'package:surfpub/providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ListPage extends StatelessWidget {
-  final List<FlutterPackage> packages;
-  const ListPage({
+class ListPage extends ConsumerWidget {
+  List<FlutterPackage> packages;
+  final bool likedPage;
+  ListPage({
     super.key,
     required this.packages,
+    required this.likedPage,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (likedPage) {
+      List<FlutterPackage> temp = [];
+
+      for (var i in packages) {
+        if (ref.watch(likesProvider).likedMap[i.name] == true) {
+          temp.add(i);
+        }
+      }
+
+      packages = temp;
+    }
+
+    if (packages.isEmpty) {
+      return Text("No Packages!");
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView.builder(
@@ -40,7 +61,7 @@ class ListComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 300,
+      width: 350,
       child: Card(
         elevation: 10,
         child: Padding(
@@ -74,6 +95,10 @@ class ListComponent extends StatelessWidget {
             TextButton(
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.all(0),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                ),
+                splashFactory: NoSplash.splashFactory,
               ),
               onPressed: () {
                 _launchURL(package.homePage);
@@ -118,6 +143,29 @@ class ListComponent extends StatelessWidget {
                       );
                     },
                   )),
+            Container(
+              height: package.topics.isEmpty ? 0 : 10,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.go('/details', extra: package);
+              },
+              child: Icon(
+                Icons.arrow_forward,
+                color: Colors.white,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                padding: EdgeInsets.only(
+                  left: 2,
+                  right: 2,
+                  top: 2,
+                  bottom: 2,
+                ),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(3))),
+              ),
+            ),
           ]),
         ),
       ),

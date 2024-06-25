@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:surfpub/flutterPackage.dart';
@@ -22,3 +25,21 @@ Future<List<FlutterPackage>> packages(PackagesRef ref) async {
 
   return data;
 }
+
+class LikedModel extends ChangeNotifier {
+  Map<String, bool> likedMap = {};
+
+  addLike(String name) {
+    likedMap[name] = true;
+    notifyListeners();
+  }
+
+  removeLike(String name) {
+    likedMap[name] = false;
+    notifyListeners();
+  }
+}
+
+final likesProvider = ChangeNotifierProvider<LikedModel>((ref) {
+  return LikedModel();
+});
